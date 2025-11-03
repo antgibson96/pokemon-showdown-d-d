@@ -78,6 +78,23 @@ Adamant Nature
 
 It's used for teambuilder import/export features, and not much else. But as a user, this is the only format you'll see.
 
+If you want to save a Pokémon with not-full HP, you can add an `HP:` line:
+
+```
+Pikachu @ Light Ball
+Ability: Static
+Level: 50
+HP: 75/115
+EVs: 252 SpA / 4 SpD / 252 Spe
+Timid Nature
+- Thunderbolt
+- Quick Attack
+- Iron Tail
+- Volt Switch
+```
+
+The HP can be specified as just a current value (`HP: 75`) or as current/max (`HP: 75/115`).
+
 
 JSON format
 -----------
@@ -170,7 +187,7 @@ Armaldo||leftovers|swiftswim|xscissor,stoneedge,aquatail,rapidspin|Adamant|128,2
 The format is a list of pokemon delimited by `]`, where every Pokémon is:
 
 ```
-NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE
+NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE,HP,MAXHP
 ```
 
 - `SPECIES` is left blank if it's identical to `NICKNAME`
@@ -212,7 +229,14 @@ NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,
 
 - `TERATYPE` if left blank will default to the Pokémon's first type.
 
-- If `POKEBALL`, `HIDDENPOWERTYPE`, `GIGANTAMAX`, `DYNAMAXLEVEL` and `TERATYPE`
+- `HP` represents the current HP of the Pokémon. This can be used to save teams
+  with Pokémon that are not at full health. If left blank, the Pokémon is assumed
+  to be at full HP.
+
+- `MAXHP` represents the maximum HP of the Pokémon. Used together with `HP` to 
+  display the health as "current/max". If left blank, only the current HP will be shown.
+
+- If `POKEBALL`, `HIDDENPOWERTYPE`, `GIGANTAMAX`, `DYNAMAXLEVEL`, `TERATYPE`, `HP`, and `MAXHP`
   are all blank, the commas will be left off.
 
 

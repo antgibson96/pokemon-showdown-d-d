@@ -113,6 +113,17 @@ export interface PokemonSet {
 	 * Tera Type
 	 */
 	teraType?: string;
+	/**
+	 * Current HP. This represents the current HP of the Pokemon.
+	 * If not specified, the Pokemon is assumed to be at full HP.
+	 */
+	hp?: number;
+	/**
+	 * Maximum HP. This represents the maximum HP of the Pokemon.
+	 * Used together with hp to display as current/max (e.g., "75/100").
+	 * If not specified, only the current HP value will be shown.
+	 */
+	maxHP?: number;
 }
 
 export const Teams = new class Teams {
@@ -199,12 +210,15 @@ export const Teams = new class Teams {
 			}
 
 			if (set.pokeball || set.hpType || set.gigantamax ||
-				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType) {
+				(set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10) || set.teraType || 
+				set.hp !== undefined || set.maxHP !== undefined) {
 				buf += `,${set.hpType || ''}`;
 				buf += `,${this.packName(set.pokeball || '')}`;
 				buf += `,${set.gigantamax ? 'G' : ''}`;
 				buf += `,${set.dynamaxLevel !== undefined && set.dynamaxLevel !== 10 ? set.dynamaxLevel : ''}`;
 				buf += `,${set.teraType || ''}`;
+				buf += `,${set.hp !== undefined ? set.hp : ''}`;
+				buf += `,${set.maxHP !== undefined ? set.maxHP : ''}`;
 			}
 		}
 
@@ -325,9 +339,9 @@ export const Teams = new class Teams {
 			j = buf.indexOf(']', i);
 			let misc;
 			if (j < 0) {
-				if (i < buf.length) misc = buf.substring(i).split(',', 6);
+				if (i < buf.length) misc = buf.substring(i).split(',', 8);
 			} else {
-				if (i !== j) misc = buf.substring(i, j).split(',', 6);
+				if (i !== j) misc = buf.substring(i, j).split(',', 8);
 			}
 			if (misc) {
 				set.happiness = (misc[0] ? Number(misc[0]) : 255);
@@ -336,6 +350,8 @@ export const Teams = new class Teams {
 				set.gigantamax = !!misc[3];
 				set.dynamaxLevel = (misc[4] ? Number(misc[4]) : 10);
 				set.teraType = misc[5];
+				if (misc[6]) set.hp = Number(misc[6]);
+				if (misc[7]) set.maxHP = Number(misc[7]);
 			}
 			if (j < 0) break;
 			i = j + 1;
@@ -416,6 +432,13 @@ export const Teams = new class Teams {
 		}
 		if (set.teraType) {
 			out += `Tera Type: ${set.teraType}  \n`;
+		}
+		if (typeof set.hp === 'number' && !isNaN(set.hp)) {
+			if (typeof set.maxHP === 'number' && !isNaN(set.maxHP)) {
+				out += `HP: ${set.hp}/${set.maxHP}  \n`;
+			} else {
+				out += `HP: ${set.hp}  \n`;
+			}
 		}
 
 		// stats
@@ -501,6 +524,16 @@ export const Teams = new class Teams {
 		} else if (line.startsWith('Tera Type: ')) {
 			line = line.slice(11);
 			set.teraType = aggressive ? line.replace(/[^a-zA-Z0-9]/g, '') : line;
+		} else if (line.startsWith('HP: ')) {
+			line = line.slice(4);
+			// Handle both "HP: 75" and "HP: 75/100" formats
+			if (line.includes('/')) {
+				const [current, max] = line.split('/');
+				set.hp = +current;
+				set.maxHP = +max;
+			} else {
+				set.hp = +line;
+			}
 		} else if (line === 'Gigantamax: Yes') {
 			set.gigantamax = true;
 		} else if (line.startsWith('EVs: ')) {

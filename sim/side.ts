@@ -1236,8 +1236,14 @@ export class Side {
 			}
 			break;
 		case 'move':
+			// Allow voluntary passing - pokemon will do nothing this turn
+			// This is useful for strategic play (e.g., waiting out weather, stalling)
 			if (!pokemon.fainted && !pokemon.volatiles['commanding']) {
-				return this.emitChoiceError(`Can't pass: Your ${pokemon.name} must make a move (or switch)`);
+				// Voluntary pass - create a pass action
+				this.choice.actions.push({
+					choice: 'pass',
+				} as ChosenAction);
+				return true;
 			}
 			break;
 		default:
